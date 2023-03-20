@@ -65,12 +65,15 @@ public class SQLiteConnectionManager {
         try (Connection conn = DriverManager.getConnection(databaseURL)) {
             if (conn != null) {
                 DatabaseMetaData meta = conn.getMetaData();
-                System.out.println("The driver name is " + meta.getDriverName());
-                System.out.println("A new database has been created.");
+                logger.log(Level.INFO, "The driver name is " + meta.getDriverName());
+                logger.log(Level.INFO, "A new database has been created.");
+                // System.out.println("The driver name is " + meta.getDriverName());
+                // System.out.println("A new database has been created.");
 
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            logger.log(Level.WARNING, e.getMessage());
+            // System.out.println(e.getMessage());
         }
     }
 
@@ -89,7 +92,8 @@ public class SQLiteConnectionManager {
                     return true;
                 }
             } catch (SQLException e) {
-                System.out.println(e.getMessage());
+                logger.log(Level.WARNING, e.getMessage());
+                // System.out.println(e.getMessage());
                 return false;
             }
         }
@@ -114,7 +118,8 @@ public class SQLiteConnectionManager {
                 return true;
 
             } catch (SQLException e) {
-                System.out.println(e.getMessage());
+                logger.log(Level.WARNING, e.getMessage());
+                // System.out.println(e.getMessage());
                 return false;
             }
         }
@@ -129,14 +134,22 @@ public class SQLiteConnectionManager {
     public void addValidWord(int id, String word) {
 
         String sql = "INSERT INTO validWords(id,word) VALUES('" + id + "','" + word + "')";
-        String sql2 = "INSERT INTO validWords(id,word) VALUES(?,?)";
-        try (Connection conn = DriverManager.getConnection(databaseURL);
-                PreparedStatement pstmt = conn.prepareStatement(sql2)) {
-            pstmt.setInt(1, id);
-            pstmt.setString(2, word);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
+
+        if (word.matches("[a-z]{4}")) {
+            String sql2 = "INSERT INTO validWords(id,word) VALUES(?,?)";
+            logger.log(Level.INFO, word);
+            try (Connection conn = DriverManager.getConnection(databaseURL);
+                    PreparedStatement pstmt = conn.prepareStatement(sql2)) {
+                pstmt.setInt(1, id);
+                pstmt.setString(2, word);
+                pstmt.executeUpdate();
+            } catch (SQLException e) {
+                logger.log(Level.WARNING, e.getMessage());
+                // System.out.println(e.getMessage());
+            }
+        } else {
+            logger.log(Level.SEVERE, "Ignored unacceptable input");
+            // System.out.println("Ignored unacceptable input");
         }
 
     }
@@ -163,7 +176,8 @@ public class SQLiteConnectionManager {
             return false;
 
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            logger.log(Level.WARNING, e.getMessage());
+            // System.out.println(e.getMessage());
             return false;
         }
 
